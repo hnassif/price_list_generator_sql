@@ -14,10 +14,8 @@ input_dir = current_dir + '\input' + '\\'
 for i in os.listdir(input_dir):
     if i.endswith(".xlsx") and i.startswith('PL'): 
         all_price_lists += [ i ]
-        continue
-    else:
-        continue
-"""
+
+
 hp_products_purchased = plg.get_cis_products_list("Mapping_Products_2.xlsx","Remove_Dup")
 
 # Filter every HP price list in 'all_price_lists'
@@ -25,7 +23,7 @@ for pl in all_price_lists:
 	print('Working on PL : ' + pl + ' ...')
 	plg.generate_filtered_product_list(pl,"SHEET1",hp_products_purchased)
 	print('Done with PL : ' + pl)
-"""
+
 
 
 # Get all products purchased
