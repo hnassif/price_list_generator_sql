@@ -87,11 +87,9 @@ def generate_filtered_product_list(hp_price_list,sheetname,hp_products_purchased
         #print( 'Columns are : ' + str(df_pl.columns))
 
         #Identify the currency
-        if 'EUR' in hp_price_list:
-            currency = 'EUR'
+        if 'numero_de_produit' in df_pl.columns:
             col_name = 'numero_de_produit'
         else: 
-            currency = 'USD'
             col_name = 'product_name'
 
         # Remove empty rows (This is to know where the data ends)
@@ -118,7 +116,7 @@ def generate_filtered_product_list(hp_price_list,sheetname,hp_products_purchased
         if frames: 
             output_df = pd.concat(frames)
         else:
-            print('No Prodcuts have been purchased')
+            print('No Products have been purchased')
             return 
 
         print( 'The filtered HP products list has Size : ' + str(output_df.size) )
@@ -135,7 +133,8 @@ def generate_filtered_product_list(hp_price_list,sheetname,hp_products_purchased
         cur.execute("SET sql_mode=(SELECT REPLACE(@@sql_mode,'STRICT_TRANS_TABLES',''))")
 
         # Remove the 'description_longue' column because the content is too big to write to SQL
-        output_df = output_df.drop(['description_longue'], axis=1)
+        if col_name == 'numero_de_produit': 
+            output_df = output_df.drop(['description_longue'], axis=1)
 
         #print( output_df )
         #print( map(lambda x: x.dtype , output_df) )
