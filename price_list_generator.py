@@ -70,12 +70,12 @@ def removeNonAscii(s):
 	return s_final
 
  
-def generate_filtered_product_list(hp_price_list,sheetname,hp_products_purchased):
+def generate_filtered_product_list(hp_price_list,HPE_or_HPI,sheetname,hp_products_purchased):
 
     try: 
 
         # Go to the input directory
-        input_dir = os.getcwd() + '\input' + '\\'
+        input_dir = os.getcwd() + '\input' + '\\' + HPE_or_HPI + '\\'
 
         # Read and Parse the 'sheet1' sheet in the Mapping Produts Excel File
         xl_pl = pd.ExcelFile( input_dir + hp_price_list)
@@ -84,13 +84,13 @@ def generate_filtered_product_list(hp_price_list,sheetname,hp_products_purchased
         # Converting columns to ASCII characters, because HP uses some non-ascii characters that the Panda library cannot handle
         columns = df_pl.columns
         df_pl.columns = map( removeNonAscii , list(columns) )
-        #print( 'Columns are : ' + str(df_pl.columns))
+        print( 'Columns are : ' + str(df_pl.columns))
 
         #Identify the currency
-        if 'numero_de_produit' in df_pl.columns:
-            col_name = 'numero_de_produit'
-        else: 
-            col_name = 'product_name'
+        #if 'numero_de_produit' in df_pl.columns:
+        #col_name = 'numero_de_produit'
+        #else: 
+        col_name = 'product_number'
 
         # Remove empty rows (This is to know where the data ends)
         criterion_pl = df_pl[ pd.notnull(df_pl[col_name]) ] 
@@ -116,41 +116,46 @@ def generate_filtered_product_list(hp_price_list,sheetname,hp_products_purchased
         if frames: 
             output_df = pd.concat(frames)
         else:
+            output_df = pd.DataFrame( columns=df_pl.columns)
+            output_df = output_df.fillna(0) # with 0s rather than NaNs
             print('No Products have been purchased')
-            return 
+            #return 
 
         print( 'The filtered HP products list has Size : ' + str(output_df.size) )
         print( 'The filtered HP products list has Shape : ' + str(output_df.shape) )
 
         # Connecting to the SQL Database
-        cnx = MySQLdb.Connect(host="127.0.0.1", port=3306, user="root", passwd="root")
+        #cnx = MySQLdb.Connect(host="127.0.0.1", port=3306, user="root", passwd="root")
+        #cnx = MySQLdb.Connect(host="localhost", port=3306, user="User1", passwd="h@nassif8") # 1433
 
         # create cursor to perform operations/queries 
-        cur = cnx.cursor() 
+        #cur = cnx.cursor() 
 
         #cur.execute("CREATE DATABASE pricel") # only needed when creating the database for the first time 
-        cur.execute("USE pricel")
-        cur.execute("SET sql_mode=(SELECT REPLACE(@@sql_mode,'STRICT_TRANS_TABLES',''))")
+        #cur.execute("USE pricel")
+        #cur.execute("SET sql_mode=(SELECT REPLACE(@@sql_mode,'STRICT_TRANS_TABLES',''))")
 
         # Remove the 'description_longue' column because the content is too big to write to SQL
-        if col_name == 'numero_de_produit': 
-            output_df = output_df.drop(['description_longue'], axis=1)
+        #if col_name == 'numero_de_produit': 
+        #output_df = output_df.drop(['description_longue'], axis=1)
+        #else: 
+        output_df = output_df.drop(['long_description_'], axis=1)
 
         #print( output_df )
         #print( map(lambda x: x.dtype , output_df) )
 
         # Write Dataframe to Database 
-        output_df.to_sql(name='pricel', con=cnx, flavor='mysql', schema=output_df.columns, if_exists='append', index=True)
+        #output_df.to_sql(name='pricel', con=cnx, flavor='mysql', schema=output_df.columns, if_exists='append', index=True)
 
         # Delete the cursor
-        del cur 
+        #del cur 
 
         # Close the connection
-        cnx.close()
+        #cnx.close()
 
         #Writing the Output to an excel file 
-        output_dir = os.getcwd() + '\output' + '\\'
-        writer = pd.ExcelWriter(output_dir + 'output_' + hp_price_list + '.xlsx')
+        #output_dir = os.getcwd() + '\output' + '\\'
+        writer = pd.ExcelWriter('output_' + hp_price_list  + '.xlsx' ) 
         output_df.to_excel(writer,'Sheet1', index=False)
         writer.save()
 

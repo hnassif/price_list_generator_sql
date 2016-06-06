@@ -3,28 +3,43 @@ import price_list_generator as plg
 import MySQLdb
 import pyodbc
 
-# 'all_price_lists' will store the name of all the PL files in the current directory
-all_price_lists = [] 
+# 'HPE_price_lists' will store the name of all the PL files in the HPE input directory
+HPE_price_lists = [] 
+# 'HPI_price_lists' will store the name of all the PL files in the HPI input directory
+HPI_price_lists = [] 
 
 # Go to the input directory
 current_dir = os.getcwd()
-input_dir = current_dir + '\input' + '\\'
+HPE_input_dir = current_dir + '\input\HPE' + '\\'
+HPI_input_dir = current_dir + '\input\HPI' + '\\'
 
-# iterate over all the PL files in the current directory and add their names to 'all_price_lists'
-for i in os.listdir(input_dir):
+# iterate over all the PL files in the HPE directory and add their names to 'HPE_price_lists'
+for i in os.listdir(HPE_input_dir):
     if i.endswith(".xlsx") and i.startswith('PL'): 
-        all_price_lists += [ i ]
+        HPE_price_lists += [ i ]
 
+# iterate over all the PL files in the HPI directory and add their names to 'HPI_price_lists'
+for i in os.listdir(HPI_input_dir):
+    if i.endswith(".xlsx") and i.startswith('PL'): 
+        HPI_price_lists += [ i ]
 
 hp_products_purchased = plg.get_cis_products_list("Mapping_Products_2.xlsx","Remove_Dup")
 
-# Filter every HP price list in 'all_price_lists'
-for pl in all_price_lists:
+print( 'WORKING ON HPE PRICE LISTS')
+# Filter every HPE price list in 'HPE_price_lists'
+for pl in HPE_price_lists:
 	print('Working on PL : ' + pl + ' ...')
-	plg.generate_filtered_product_list(pl,"SHEET1",hp_products_purchased)
+	plg.generate_filtered_product_list(pl,'HPE',"SHEET1",hp_products_purchased)
 	print('Done with PL : ' + pl)
+print( 'DONE WITH HPE PRICE LISTS')
 
-
+print( 'WORKING ON HPI PRICE LISTS')
+# Filter every HPI price list in 'HPI_price_lists'
+for pl in HPI_price_lists:
+	print('Working on PL : ' + pl + ' ...')
+	plg.generate_filtered_product_list(pl,'HPI',"SHEET1",hp_products_purchased)
+	print('Done with PL : ' + pl)
+print( 'DONE WITH HPI PRICE LISTS')
 
 # Get all products purchased
 #hp_products_purchased = plg.get_cis_products_list("Mapping_Products_2.xlsx","Remove_Dup")
